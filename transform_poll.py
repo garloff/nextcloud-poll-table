@@ -85,7 +85,7 @@ class Tbl:
         max_opt = max(map(lambda x: x.vote_option_id, db_lns))
         #print("Options range from %i to %i" % (min_opt, max_opt), file=sys.stderr)
         self.nr_opts = max_opt+1 - min_opt
-        self.opts = [None]*self.nr_opts
+        self.opts = [""]*self.nr_opts
         for db_ln in db_lns:
             vote_id = db_ln.vote_option_id - min_opt
             vote = self.find_vote(db_ln.user_id)
