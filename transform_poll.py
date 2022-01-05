@@ -113,16 +113,19 @@ class Tbl:
 
 def usage():
     "Help"
-    print("Usage: transform_poll.py [-n numbers] table.csv", file=sys.stderr)
-    print(" Takes polls_vote nextcloud DB export (tab sep text file) and")
-    print(" and transforms it to a 2D table (written to stdout)")
+    print("Usage: transform_poll.py [-n numbers] [-p poll_id] table", file=sys.stderr)
+    print("    Takes polls_vote nextcloud DB export (tab sep text file) and")
+    print("    and transforms it to a 2D table (written to stdout)")
     print(" -n assigns numeric values to votes yes, maybe, (empty), no")
+    print(" -p instead connects to a database (pass sqlalchemy conn str in table)")
+    print("    poll_id selects the poll, 0 lists all polls")
     sys.exit(1)
 
 def main(argv):
     global do_out_numbers, vote_vals
+    poll_id = -1
     try:
-        opts, args = getopt.gnu_getopt(argv[1:], 'hn:', ('help',))
+        opts, args = getopt.gnu_getopt(argv[1:], 'hn:p:', ('help',))
     except getopt.GetoptError as exc:
         print >>sys.stderr, exc
         usage()
@@ -133,11 +136,19 @@ def main(argv):
             do_out_numbers = True
             if arg:
                 vote_vals = list(map(lambda x: float(x), arg.split(",")))
+        if opt == "-p":
+            poll_id = int(arg)
 
     if not args:
         usage()
 
-    poll = Tbl(read_tbl(open(args[0], "r")))
+    if poll_id == -1:
+        poll = Tbl(read_tbl(open(args[0], "r")))
+    else:
+        import oc_database
+        if poll_id == 0:
+            sys.exit(oc_database.main((args[0]),))
+        poll = Tbl(oc_database.get_votes(args[0], poll_id))
     print("%s" % poll)
 
 if __name__ == "__main__":
