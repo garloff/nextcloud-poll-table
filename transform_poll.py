@@ -147,7 +147,7 @@ def main(argv):
     else:
         import oc_database
         if poll_id == 0:
-            sys.exit(oc_database.main((args[0]),))
+            sys.exit(oc_database.main((args[0],)))
         poll = Tbl(oc_database.get_votes(args[0], poll_id))
     print("%s" % poll)
 
